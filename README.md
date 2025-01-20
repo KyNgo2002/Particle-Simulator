@@ -51,6 +51,7 @@ The Particle Simulator is a C++ project built with OpenGL for visualization and 
 ## Usage
 - **Gravity Toggle:** Use the keyboard shortcut (e.g., `G`) to toggle gravity on or off.
 - **Pause Simulation:** Press `Space` to reset the simulation.
+- **Exit Simulation:** Press `Esc` to reset the simulation.
 
 <!--
 ## File Structure
@@ -85,8 +86,11 @@ particle-simulator/
 
 ## Contact
 My LinkedIn: https://www.linkedin.com/in/ky-ngo/
+
 My Github: https://github.com/KyNgo2002
+
 My Portfolio: https://kyngo2002.github.io/portfolio/
+
 For questions or support, please contact [Kyngo992@gmail.com].
 
 
