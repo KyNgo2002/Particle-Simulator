@@ -8,7 +8,7 @@
 #include "../include/Shader.h"
 
 const unsigned int WINDOW_SIZE = 800;
-const unsigned int NUM_PARTICLES = 100;
+const unsigned int NUM_PARTICLES = 700;
 const float RADIUS = 0.02f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);

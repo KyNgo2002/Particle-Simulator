@@ -31,9 +31,9 @@ void Particle::updateMovement(float deltaTime, bool verlet, bool gravity) {
 		m_position = m_position + velocity + m_acceleration * deltaTime * deltaTime;
 	}
 	else {
-		if (gravity)
+		/*if (gravity)
 			m_velocity[1] -= gravity * deltaTime;
-		m_position += m_velocity * deltaTime;
+		m_position += m_velocity * deltaTime;*/
 	}
 }
 

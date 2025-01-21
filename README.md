@@ -3,12 +3,17 @@
 ## Overview
 The Particle Simulator is a C++ project built with OpenGL for visualization and CUDA architecture for performance optimization. This simulator models 2D particle movements, elastic collisions with boundaries and other particles, and supports simulations both with and without gravitational effects.
 
+![Image of Particle simulator with Gravity on](src/GravityOn.png "GravityOn.png")
+
 ## Features
 - **2D Particle Movements:** Simulates the trajectories of particles in a two-dimensional space.
 - **Elastic Collisions:** Models realistic elastic collisions between particles and boundaries.
 - **Gravity Toggle:** Enables or disables the effects of gravity on particle motion.
 - **Real-Time Rendering:** Uses OpenGL for fast and interactive visualization.
 - **High Performance:** Optimized with CUDA to handle a large number of particles efficiently.
+
+![Image of Particle simulator with Gravity off](src/GravityOff.png "GravityOff.png")
+
 
 ## Requirements
 ### Software

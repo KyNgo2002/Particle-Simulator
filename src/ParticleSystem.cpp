@@ -100,10 +100,16 @@ void ParticleSystem::toggleRunning() {
 void ParticleSystem::toggleGravity() {
 	m_GRAVITY = !m_GRAVITY;
 	std::cout << "Gravity: ";
-	if (m_GRAVITY) 
+	if (m_GRAVITY) {
 		std::cout << "ON" << std::endl;
-	else
+		for (unsigned i = 0; i < m_numParticles; ++i) {
+			m_particles[i].m_velocity[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 1.5f;
+			m_particles[i].m_velocity[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 1.5f;
+		}
+	}
+	else {
 		std::cout << "OFF" << std::endl;
+	}
 }
 
 // Handles particle movement
@@ -150,8 +156,13 @@ void ParticleSystem::handleCollisions() {
 				Eigen::Vector2f v2n = (m_particles[j].m_velocity.dot(normal)) / (dist * dist) * normal;
 				Eigen::Vector2f v2t = (m_particles[j].m_velocity - v2n);
 
-				m_particles[i].m_velocity = v2n + v1t;
-				m_particles[j].m_velocity = v1n + v2t;
+				m_particles[i].m_velocity = (v2n + v1t);
+				m_particles[j].m_velocity = (v1n + v2t);
+
+				if (m_GRAVITY) {
+					m_particles[i].m_velocity *= DAMPENER;
+					m_particles[j].m_velocity *= DAMPENER;
+				}
 
 				// OLD APPROACH
 				/*float magnitude = m_particles[i].m_velocity.norm();
@@ -172,8 +183,11 @@ void ParticleSystem::handleCollisions() {
 	for (unsigned i = 0; i < m_numParticles; ++i) {
 		if (m_particles[i].m_position[1] > (1.0f - m_radius)) {
 			m_particles[i].m_position[1] = (1.0f - m_radius);
-			m_particles[i].m_velocity[1] *= -DAMPENER;
+			m_particles[i].m_velocity[1] *= -1.0f;
+			if (m_GRAVITY)
+				m_particles[i].m_velocity[1] *= DAMPENER;
 			m_particlePos[i * 2 + 1] = (1.0f - m_radius);
+			
 		}
 	}
 
@@ -181,7 +195,9 @@ void ParticleSystem::handleCollisions() {
 	for (unsigned i = 0; i < m_numParticles; ++i) {
 		if (m_particles[i].m_position[1] < (-1.0f + m_radius)) {
 			m_particles[i].m_position[1] = (-1.0f + m_radius);
-			m_particles[i].m_velocity[1] *= -DAMPENER;
+			m_particles[i].m_velocity[1] *= -1.0f;
+			if (m_GRAVITY)
+				m_particles[i].m_velocity[1] *= DAMPENER;
 			m_particlePos[i * 2 + 1] = (-1.0f + m_radius);
 		}
 	}
@@ -190,9 +206,10 @@ void ParticleSystem::handleCollisions() {
 	for (unsigned i = 0; i < m_numParticles; ++i) {
 		if (m_particles[i].m_position[0] < (-1.0f + m_radius)) {
 			m_particles[i].m_position[0] = (-1.0f + m_radius);
-			m_particles[i].m_velocity[0] *= -DAMPENER;
+			m_particles[i].m_velocity[0] *= -1.0f;
+			if (m_GRAVITY)
+				m_particles[i].m_velocity[0] *= DAMPENER;
 			m_particlePos[i * 2] = (-1.0f + m_radius);
-
 		}
 	}
 
@@ -200,7 +217,9 @@ void ParticleSystem::handleCollisions() {
 	for (unsigned i = 0; i < m_numParticles; ++i) {
 		if (m_particles[i].m_position[0] > (1.0f - m_radius)) {
 			m_particles[i].m_position[0] = (1.0f - m_radius);
-			m_particles[i].m_velocity[0] *= -DAMPENER;
+			m_particles[i].m_velocity[0] *= -1.0f;
+			if (m_GRAVITY)
+				m_particles[i].m_velocity[0] *= DAMPENER;
 			m_particlePos[i * 2] = (1.0f - m_radius);
 		}
 	}

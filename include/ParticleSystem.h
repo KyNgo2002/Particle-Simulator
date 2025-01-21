@@ -11,12 +11,12 @@ class ParticleSystem {
 private:
 	// Constants
 	const float GRAVITY		= 9.8f;
-	const float DAMPENER	= 1.0f;
+	const float DAMPENER	= 0.7f;
 	const unsigned SUBSTEPS = 8;
 
 	// Particle System state flags
 	bool m_RUNNING = true;
-	bool m_GRAVITY = false;
+	bool m_GRAVITY = false; // True = gravity acting on particles
 	bool m_VERLET  = true;
 
 	// MISC particle information

@@ -1,2 +1,6 @@
 .vs/
 particle.*
+Debug/
+Release/
+x64/
+x86/
