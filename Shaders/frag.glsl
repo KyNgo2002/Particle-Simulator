@@ -7,8 +7,8 @@ uniform float Radius;
 uniform vec2 Resolution;
 uniform vec2 Origin;
 uniform int NumParticles;
-uniform vec2 ParticleCoords[700];
-uniform vec3 ParticleColors[700];
+uniform vec2 ParticleCoords[1000];
+uniform vec3 ParticleColors[1000];
 
 void main() {
 	vec2 fragCoord = (gl_FragCoord.xy / Resolution) * 2.0f - 1;

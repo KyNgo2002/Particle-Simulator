@@ -8,8 +8,8 @@
 #include "../include/Shader.h"
 
 const unsigned int WINDOW_SIZE = 800;
-const unsigned int NUM_PARTICLES = 700;
-const float RADIUS = 0.02f;
+const unsigned int NUM_PARTICLES = 10;
+const float RADIUS = 0.01f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window, ParticleSystem& particleSystem);
@@ -44,7 +44,7 @@ int main() {
 	}
 
 	// Shader Program initialization
-	Shader shaderProgram("shaders/vert.glsl", "shaders/frag.glsl");
+	Shader shaderProgram("shaders/vert.glsl", "shaders/frag.glsl", "shaders/compute.glsl");
 
 	// Regular vs testing constructor
 	ParticleSystem particleSystem(NUM_PARTICLES, WINDOW_SIZE, RADIUS);

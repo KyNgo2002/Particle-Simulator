@@ -20,8 +20,8 @@ ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float
 			x = ((cols / 2 - j) * 50.0f) / windowSize;
 			y = ((rows / 2 - i) * 50.0f) / windowSize;
 
-			float vx = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-			float vy = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			float vx = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+			float vy = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
 
 			float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 			float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -103,8 +103,8 @@ void ParticleSystem::toggleGravity() {
 	if (m_GRAVITY) {
 		std::cout << "ON" << std::endl;
 		for (unsigned i = 0; i < m_numParticles; ++i) {
-			m_particles[i].m_velocity[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 1.5f;
-			m_particles[i].m_velocity[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 1.5f;
+			m_particles[i].m_velocity[0] = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+			m_particles[i].m_velocity[1] = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
 		}
 	}
 	else {

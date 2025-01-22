@@ -151,6 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="compute.glsl" />
     <None Include="README.md" />
     <None Include="Shaders\frag.glsl" />
     <None Include="Shaders\vert.glsl" />

@@ -18,7 +18,7 @@ public:
 
 	// Particle system logic
 	void updateMovement(float deltaTime, bool verlet, bool gravity);
-	//void accelerate(Eigen::Vector2f& acc);
+	void accelerate(Eigen::Vector2f& acc);
 
 };
 

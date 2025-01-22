@@ -48,6 +48,9 @@
     </None>
     <None Include=".gitignore" />
     <None Include="README.md" />
+    <None Include="compute.glsl">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Shader.h">
