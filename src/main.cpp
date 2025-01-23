@@ -8,7 +8,7 @@
 #include "../include/Shader.h"
 
 const unsigned int WINDOW_SIZE = 800;
-const unsigned int NUM_PARTICLES = 10;
+const unsigned int NUM_PARTICLES = 500;
 const float RADIUS = 0.01f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -20,8 +20,8 @@ int main() {
 
 	// GLFW initialization
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Window creation
@@ -43,6 +43,9 @@ int main() {
 		return -1;
 	}
 
+	const GLubyte* version = glGetString(GL_VERSION);
+	std::cout << "OpenGL Versions: " << version << std::endl;
+
 	// Shader Program initialization
 	Shader shaderProgram("shaders/vert.glsl", "shaders/frag.glsl", "shaders/compute.glsl");
 
@@ -57,8 +60,8 @@ int main() {
 	};
 
 	// EBO vertices
-	unsigned int indices[] = {
-		0, 2, 1,
+	unsigned int indices[] = {	
+		1, 0, 2,
 		2, 3, 1
 	};
 
@@ -80,7 +83,7 @@ int main() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	
 	// position attribute
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
 	// VBO
@@ -92,11 +95,11 @@ int main() {
 	// Handle uniforms and other information
 	int radiusLoc = glGetUniformLocation(shaderProgram.shaderProgramID, "Radius");
 	glUniform1f(radiusLoc, RADIUS);
-	std::cout << "UNIFORM LOCATION::RADIUS -> " << radiusLoc << std::endl;
+	std::cout << "UNIFORM LOCATION::Radius -> " << radiusLoc << std::endl;
 
 	int resolutionLoc = glGetUniformLocation(shaderProgram.shaderProgramID, "Resolution");
 	glUniform2f(resolutionLoc, (float)WINDOW_SIZE, (float)WINDOW_SIZE);
-	std::cout << "UNIFORM LOCATION::RESOLUTION -> " << resolutionLoc << std::endl;
+	std::cout << "UNIFORM LOCATION::Resolution -> " << resolutionLoc << std::endl;
 
 	int numParticlesLoc = glGetUniformLocation(shaderProgram.shaderProgramID, "NumParticles");
 	glUniform1i(numParticlesLoc, NUM_PARTICLES);
@@ -110,9 +113,10 @@ int main() {
 	glUniform3fv(particleColorsLoc, NUM_PARTICLES, particleSystem.getParticleColor());
 	std::cout << "UNIFORM LOCATION::ParticleColors -> " << particleColorsLoc << std::endl;
 
-
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
+
+	GLenum err;
 
 	auto prevTime = GetTickCount64();
 	auto currTime = GetTickCount64();
@@ -134,13 +138,15 @@ int main() {
 			float deltaTime = (currTime - prevTime) / 1000.0f;
 			if (deltaTime) {
 				particleSystem.simulate(deltaTime);
-				glUniform2fv(shaderProgram.shaderProgramID, NUM_PARTICLES, particleSystem.getParticlePos());
+				glUniform2fv(particlePosLoc, NUM_PARTICLES, particleSystem.getParticlePos());
 			}
 		}
 		prevTime = currTime;
 
+		
 		calculateFPS(runningFrameCount, totalFrames);
-
+		
+		
 		// Used to draw from EBO
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned), GL_UNSIGNED_INT, 0);
 		
@@ -148,6 +154,9 @@ int main() {
 		glfwPollEvents();
 	}
 
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		std::cout << "OpenGL Error: " << err << std::endl;
+	}
 	// Cleanup buffers and shaders
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);

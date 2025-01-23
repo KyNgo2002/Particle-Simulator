@@ -89,6 +89,7 @@ Shader::Shader(const char* vertexSource, const char* fragSource, const char* com
 
 	// Linked both/all compiled shaders objects into final shader program object;
 	shaderProgramID = glCreateProgram();
+	std::cout << "ShaderProgramID: -> " << shaderProgramID << std::endl;
 	glAttachShader(shaderProgramID, vertexShader);
 	glAttachShader(shaderProgramID, fragmentShader);
 	//glAttachShader(shaderProgramID, computeShader);
