@@ -76,42 +76,6 @@ void ParticleSystem::simulate(float deltaTime){
 	}
 }
 
-// Returns array of particle positons
-float* ParticleSystem::getParticlePos() {
-	return m_particlePos.data();
-}
-
-// Gets array of particle colors
-float* ParticleSystem::getParticleColor() {
-	return m_particleColor.data();
-}
-
-// Returns whether or not the particle system is running
-bool ParticleSystem::isRunning() {
-	return m_RUNNING;
-}
-
-// Toggles the particle system on and off
-void ParticleSystem::toggleRunning() {
-	m_RUNNING = !m_RUNNING;
-}
-
-// Toggles Gravity
-void ParticleSystem::toggleGravity() {
-	m_GRAVITY = !m_GRAVITY;
-	std::cout << "Gravity: ";
-	if (m_GRAVITY) {
-		std::cout << "ON" << std::endl;
-		for (unsigned i = 0; i < m_numParticles; ++i) {
-			m_particles[i].m_velocity[0] = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
-			m_particles[i].m_velocity[1] = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
-		}
-	}
-	else {
-		std::cout << "OFF" << std::endl;
-	}
-}
-
 // Handles particle movement
 void ParticleSystem::handleParticleMovement(float deltaTime) {
 	// Gravity
@@ -163,36 +127,20 @@ void ParticleSystem::handleCollisions() {
 					m_particles[i].m_velocity *= DAMPENER;
 					m_particles[j].m_velocity *= DAMPENER;
 				}
-
-				// OLD APPROACH
-				/*float magnitude = m_particles[i].m_velocity.norm();
-				float distX = m_particles[i].m_position[0] - m_particles[j].m_position[0];
-				float distY = m_particles[i].m_position[1] - m_particles[j].m_position[1];
-				float angle = atan2(std::clamp(distY, -1.0f, 1.0f), std::clamp(distX, -1.0f, 1.0f));
-
-				m_particles[i].m_velocity[0] = -magnitude * cos(angle);
-				m_particles[i].m_velocity[1] = magnitude * sin(angle);
-
-				m_particles[j].m_velocity[0] = magnitude * cos(angle);
-				m_particles[j].m_velocity[1] = -magnitude * sin(angle);*/
 			}
 		}
 	}
 
-	// Collision with top border
 	for (unsigned i = 0; i < m_numParticles; ++i) {
+		// Collision with top border
 		if (m_particles[i].m_position[1] > (1.0f - m_radius)) {
 			m_particles[i].m_position[1] = (1.0f - m_radius);
 			m_particles[i].m_velocity[1] *= -1.0f;
 			if (m_GRAVITY)
 				m_particles[i].m_velocity[1] *= DAMPENER;
 			m_particlePos[i * 2 + 1] = (1.0f - m_radius);
-			
 		}
-	}
-
-	// Collision with bottom border
-	for (unsigned i = 0; i < m_numParticles; ++i) {
+		// Collision with bottom border
 		if (m_particles[i].m_position[1] < (-1.0f + m_radius)) {
 			m_particles[i].m_position[1] = (-1.0f + m_radius);
 			m_particles[i].m_velocity[1] *= -1.0f;
@@ -200,10 +148,7 @@ void ParticleSystem::handleCollisions() {
 				m_particles[i].m_velocity[1] *= DAMPENER;
 			m_particlePos[i * 2 + 1] = (-1.0f + m_radius);
 		}
-	}
-	
-	// Collision with left border
-	for (unsigned i = 0; i < m_numParticles; ++i) {
+		// Collision with left border
 		if (m_particles[i].m_position[0] < (-1.0f + m_radius)) {
 			m_particles[i].m_position[0] = (-1.0f + m_radius);
 			m_particles[i].m_velocity[0] *= -1.0f;
@@ -211,10 +156,7 @@ void ParticleSystem::handleCollisions() {
 				m_particles[i].m_velocity[0] *= DAMPENER;
 			m_particlePos[i * 2] = (-1.0f + m_radius);
 		}
-	}
-
-	// Collision with right border
-	for (unsigned i = 0; i < m_numParticles; ++i) {
+		// Collision with right border
 		if (m_particles[i].m_position[0] > (1.0f - m_radius)) {
 			m_particles[i].m_position[0] = (1.0f - m_radius);
 			m_particles[i].m_velocity[0] *= -1.0f;
@@ -225,8 +167,44 @@ void ParticleSystem::handleCollisions() {
 	}
 }
 
+// Returns array of particle positons
+float* ParticleSystem::getParticlePos() {
+	return m_particlePos.data();
+}
+
+// Gets array of particle colors
+float* ParticleSystem::getParticleColor() {
+	return m_particleColor.data();
+}
+
+// Returns whether or not the particle system is running
+bool ParticleSystem::isRunning() {
+	return m_RUNNING;
+}
+
+// Toggles the particle system on and off
+void ParticleSystem::toggleRunning() {
+	m_RUNNING = !m_RUNNING;
+}
+
+// Toggles Gravity
+void ParticleSystem::toggleGravity() {
+	m_GRAVITY = !m_GRAVITY;
+	std::cout << "Gravity: ";
+	if (m_GRAVITY) {
+		std::cout << "ON" << std::endl;
+		for (unsigned i = 0; i < m_numParticles; ++i) {
+			m_particles[i].m_velocity[0] = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+			m_particles[i].m_velocity[1] = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+		}
+	}
+	else {
+		std::cout << "OFF" << std::endl;
+	}
+}
+
+
 // Prints particle positions 
-// </summary>
 void ParticleSystem::printParticlePos(){
 	for (unsigned i = 0; i < m_numParticles; ++i) {
 		std::cout << "Position: " << i + 1 << " -> " << m_particles[i].m_position[0] << " : " << m_particles[i].m_position[1] << std::endl;

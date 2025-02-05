@@ -10,6 +10,7 @@ public:
 	unsigned int shaderProgramID;
 
 	Shader(const char* vertexSource, const char* fragSource, const char* computeSource);
+	void setUniform();
 	void clean();
 	void use();
 };

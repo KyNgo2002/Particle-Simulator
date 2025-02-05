@@ -143,9 +143,7 @@ int main() {
 		}
 		prevTime = currTime;
 
-		
 		calculateFPS(runningFrameCount, totalFrames);
-		
 		
 		// Used to draw from EBO
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned), GL_UNSIGNED_INT, 0);
@@ -154,9 +152,9 @@ int main() {
 		glfwPollEvents();
 	}
 
-	while ((err = glGetError()) != GL_NO_ERROR) {
+	while ((err = glGetError()) != GL_NO_ERROR) 
 		std::cout << "OpenGL Error: " << err << std::endl;
-	}
+	
 	// Cleanup buffers and shaders
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
