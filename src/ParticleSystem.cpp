@@ -1,17 +1,5 @@
 #include "../include/ParticleSystem.h"
 
-#define cudaCheckErrors(msg) \
-    do { \
-        cudaError_t __err = cudaGetLastError(); \
-        if (__err != cudaSuccess) { \
-            fprintf(stderr, "Fatal error: %s (%s at %s:%d)\n", \
-                msg, cudaGetErrorString(__err), \
-                __FILE__, __LINE__); \
-            fprintf(stderr, "*** FAILED - ABORTING\n"); \
-            exit(1); \
-        } \
-    } while (0)
-
 // Initializes particles with position, velocity, and color
 ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float radius, bool enableCuda)
 	: m_numParticles{ numParticles }, m_WindowSize{ windowSize }, m_radius{ radius }, m_CUDA_ENABLED{ enableCuda } {
@@ -19,10 +7,6 @@ ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float
 	m_particlePos = std::vector<float>(m_numParticles * 2);
 	m_particleVel = std::vector<float>(m_numParticles * 2);
 	m_particleColor = std::vector<float>(m_numParticles * 3);
-
-	if (m_CUDA_ENABLED) {
-
-	}
 
 	m_particles.reserve(numParticles);
 
@@ -56,11 +40,14 @@ ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float
 			count--;
 		}
 	}
+
+	cudaHelper = CudaHelper(m_numParticles, m_GRAVITY, m_particlePos.data(), m_particleVel.data());
+
 }
 
 // Cleans up particle system
 ParticleSystem::~ParticleSystem() {
-
+	cudaHelper.clean();
 }
 
 // Controls particle movement and collision calculations 
@@ -75,7 +62,7 @@ void ParticleSystem::simulate(float deltaTime){
 // Handles particle movement
 void ParticleSystem::handleMovement(float deltaTime) {
 	if (m_CUDA_ENABLED) {
-		launchMovementKernel(m_numParticles, deltaTime, m_particlePos.data(), m_particleVel.data(), m_GRAVITY);
+		launchMovementKernel(cudaHelper, deltaTime);
 		for (unsigned i = 0; i < m_numParticles; ++i) {
 			m_particles[i].m_position[0] = m_particlePos[i * 2];
 			m_particles[i].m_position[1] = m_particlePos[i * 2 + 1];

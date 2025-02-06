@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\CudaHelper.cpp" />
     <ClCompile Include="include\glad.c" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Particle.cpp" />
@@ -159,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="Cuda\Kernel.cuh" />
+    <ClInclude Include="include\CudaHelper.h" />
     <ClInclude Include="include\Particle.h" />
     <ClInclude Include="include\ParticleSystem.h" />
     <ClInclude Include="include\Shader.h" />

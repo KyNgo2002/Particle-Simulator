@@ -23,41 +23,41 @@ __global__ void handleMovementKernel(unsigned numParticles, float deltaTime, flo
     }
 }
 
-void launchMovementKernel(unsigned numParticles, float deltaTime, float* h_particlePos, float* h_particleVel, bool GRAVITY) {
+void launchMovementKernel(CudaHelper& cudaHelper, float deltaTime) {
 
-	unsigned numBlocks = (numParticles + blockSize - 1) / blockSize; 
+	unsigned numBlocks = (cudaHelper.m_numParticles + blockSize - 1) / blockSize; 
 
-	// Kernel launch preprocessing
+	/*// Kernel launch preprocessing
     float* d_particlePos;
-    float* d_particleVel;
+    float* d_particleVel; 
 
     // Memory allocation: Device
     cudaMalloc(&d_particlePos, numParticles * 2 * sizeof(float));
     cudaCheckErrors("Malloc failure: Particle Positions");
     cudaMalloc(&d_particleVel, numParticles * 2 * sizeof(float));
-    cudaCheckErrors("Malloc failure: Particle Velocities");
+    cudaCheckErrors("Malloc failure: Particle Velocities"); */
 
     // Memory copy: Host to device
-    cudaMemcpy(d_particlePos, h_particlePos, numParticles * 2 * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(cudaHelper.d_particlePos, cudaHelper.h_particlePos, cudaHelper.m_numParticles * 2 * sizeof(float), cudaMemcpyHostToDevice);
     cudaCheckErrors("Memcpy failure: Particle Positions host to device");
-    cudaMemcpy(d_particleVel, h_particleVel, numParticles * 2 * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(cudaHelper.d_particleVel, cudaHelper.h_particleVel, cudaHelper.m_numParticles * 2 * sizeof(float), cudaMemcpyHostToDevice);
     cudaCheckErrors("Memcpy failure: Particle Velocities host to device");
 
     // Kernel Launch
-	handleMovementKernel <<< numBlocks, blockSize >>> (numParticles, deltaTime, d_particlePos, d_particleVel, GRAVITY);
+	handleMovementKernel <<< numBlocks, blockSize >>> (cudaHelper.m_numParticles, deltaTime, cudaHelper.d_particlePos, cudaHelper.d_particleVel, cudaHelper.m_GRAVITY);
     cudaDeviceSynchronize();
     cudaCheckErrors("Kernel Launch: Calculate position kernel");
 
     // Memory copy: Device to host
-    cudaMemcpy(h_particlePos, d_particlePos, numParticles * 2 * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(cudaHelper.h_particlePos, cudaHelper.d_particlePos, cudaHelper.m_numParticles * 2 * sizeof(float), cudaMemcpyDeviceToHost);
     cudaCheckErrors("Memcpy failure: Particle Positions device to host");
-    cudaMemcpy(h_particleVel, d_particleVel, numParticles * 2 * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(cudaHelper.h_particleVel, cudaHelper.d_particleVel, cudaHelper.m_numParticles * 2 * sizeof(float), cudaMemcpyDeviceToHost);
     cudaCheckErrors("Memcpy failure: Particle Velocities device to host");
 
-    cudaFree(d_particlePos);
+    /*cudaFree(d_particlePos);
     cudaCheckErrors("Free failure: Particle Positions");
     cudaFree(d_particleVel);
-    cudaCheckErrors("Free failure: Particle Velocities");
+    cudaCheckErrors("Free failure: Particle Velocities");*/
 
 
 }

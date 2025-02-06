@@ -7,6 +7,7 @@
 #include "Particle.h"
 #include "../Cuda/Kernel.cuh"
 #include <cuda_runtime.h>
+#include "CudaHelper.h"
 
 class ParticleSystem {
 private:
@@ -33,6 +34,8 @@ private:
 	std::vector<float> m_particleColor;
 
 	float m_radius;
+
+	CudaHelper cudaHelper;
 
 public:
 	// Constructors/destructors
