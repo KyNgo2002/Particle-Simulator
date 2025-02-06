@@ -1,12 +1,28 @@
 #include "../include/ParticleSystem.h"
 
+#define cudaCheckErrors(msg) \
+    do { \
+        cudaError_t __err = cudaGetLastError(); \
+        if (__err != cudaSuccess) { \
+            fprintf(stderr, "Fatal error: %s (%s at %s:%d)\n", \
+                msg, cudaGetErrorString(__err), \
+                __FILE__, __LINE__); \
+            fprintf(stderr, "*** FAILED - ABORTING\n"); \
+            exit(1); \
+        } \
+    } while (0)
 
 // Initializes particles with position, velocity, and color
-ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float radius)
-	: m_numParticles{ numParticles }, m_WindowSize{ windowSize }, m_radius{ radius } {
+ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float radius, bool enableCuda)
+	: m_numParticles{ numParticles }, m_WindowSize{ windowSize }, m_radius{ radius }, m_CUDA_ENABLED{ enableCuda } {
 
 	m_particlePos = std::vector<float>(m_numParticles * 2);
+	m_particleVel = std::vector<float>(m_numParticles * 2);
 	m_particleColor = std::vector<float>(m_numParticles * 3);
+
+	if (m_CUDA_ENABLED) {
+
+	}
 
 	m_particles.reserve(numParticles);
 
@@ -17,8 +33,8 @@ ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float
 	for (int i = 0; i < rows; ++i) {
 		int cols = std::min(10, count);
 		for (int j = 0; j < cols; ++j) {
-			x = ((cols / 2 - j) * 50.0f) / windowSize;
-			y = ((rows / 2 - i) * 50.0f) / windowSize;
+			x = ((cols / 2.0f - j) * 50.0f) / windowSize;
+			y = ((rows / 2.0f - i) * 50.0f) / windowSize;
 
 			float vx = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
 			float vy = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
@@ -27,10 +43,12 @@ ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float
 			float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 			float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 			
-			m_particles.push_back(Particle(x, y, vx, vy, r, g, b, m_radius));
+			m_particles.push_back(Particle(x, y, vx, vy, r, g, b));
 
 			m_particlePos[i * 20 + j * 2] = x;
 			m_particlePos[i * 20 + j * 2 + 1] = y;
+			m_particleVel[i * 20 + j * 2] = vx;
+			m_particleVel[i * 20 + j * 2 + 1] = vy;
 			m_particleColor[i * 30 + j * 3] = r;
 			m_particleColor[i * 30 + j * 3 + 1] = g;
 			m_particleColor[i * 30 + j * 3 + 2] = b;
@@ -40,31 +58,9 @@ ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float
 	}
 }
 
-// Testing contructor
-ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float radius, bool random)
-	: m_numParticles{ numParticles }, m_WindowSize{ windowSize }, m_radius{ radius } {
-
-	m_particlePos = std::vector<float>(m_numParticles * 2);
-	m_particleColor = std::vector<float>(m_numParticles * 3);
-
-	m_particles.reserve(numParticles);
-
-	m_particles.push_back(Particle(-0.4f, 0.4f, 0.06f, -0.06f, 0.0f, 1.0f, 1.0f, m_radius));
-	m_particles.push_back(Particle(0.4f, -0.4f, -0.06f, 0.06f, 0.0f, 1.0f, 1.0f, m_radius));
-	m_particlePos[0] = -0.4f;
-	m_particlePos[1] = 0.4f;
-	m_particlePos[2] = 0.4f;
-	m_particlePos[3] = -0.4f;
-	m_particleColor[0] = 0.0f;
-	m_particleColor[1] = 1.0f;
-	m_particleColor[2] = 1.0f;
-	m_particleColor[3] = 0.5f;
-	m_particleColor[4] = 0.5f;
-	m_particleColor[5] = 1.0f;
-}
-
-// Cleans up particle position and color arrays
+// Cleans up particle system
 ParticleSystem::~ParticleSystem() {
+
 }
 
 // Controls particle movement and collision calculations 
@@ -72,19 +68,31 @@ void ParticleSystem::simulate(float deltaTime){
 	float subDeltaTime = deltaTime / SUBSTEPS;
 	for (unsigned i = 0; i < SUBSTEPS; ++i) {
 		handleCollisions();
-		handleParticleMovement(subDeltaTime);
+		handleMovement(subDeltaTime);
 	}
 }
 
 // Handles particle movement
-void ParticleSystem::handleParticleMovement(float deltaTime) {
-	// Gravity
-	for (unsigned i = 0; i < m_numParticles; ++i) {
-		if (m_GRAVITY)
-			m_particles[i].m_velocity[1] -= GRAVITY * deltaTime;
-		m_particles[i].m_position += m_particles[i].m_velocity * deltaTime;
-		m_particlePos[i * 2] = m_particles[i].m_position[0];
-		m_particlePos[i * 2 + 1] = m_particles[i].m_position[1];
+void ParticleSystem::handleMovement(float deltaTime) {
+	if (m_CUDA_ENABLED) {
+		launchMovementKernel(m_numParticles, deltaTime, m_particlePos.data(), m_particleVel.data(), m_GRAVITY);
+		for (unsigned i = 0; i < m_numParticles; ++i) {
+			m_particles[i].m_position[0] = m_particlePos[i * 2];
+			m_particles[i].m_position[1] = m_particlePos[i * 2 + 1];
+
+			m_particles[i].m_velocity[1] = m_particleVel[i * 2 + 1];
+		}
+	}
+	else {
+		for (unsigned i = 0; i < m_numParticles; ++i) {
+			if (m_GRAVITY) {
+				m_particles[i].m_velocity[1] -= GRAVITY * deltaTime;
+				m_particleVel[i * 2 + 1] -= GRAVITY * deltaTime;
+			}
+			m_particles[i].m_position += m_particles[i].m_velocity * deltaTime;
+			m_particlePos[i * 2] = m_particles[i].m_position[0];
+			m_particlePos[i * 2 + 1] = m_particles[i].m_position[1];
+		}
 	}
 }
 
@@ -95,8 +103,8 @@ void ParticleSystem::handleCollisions() {
 		for (unsigned j = i + 1; j < m_numParticles; ++j) {
 			Eigen::Vector2f normal = m_particles[i].m_position - m_particles[j].m_position;
 			// Optimization
-			if (abs(normal[0]) > 2.5f * m_radius) continue;
-			if (abs(normal[1]) > 2.5f * m_radius) continue;
+			if (abs(normal[0]) > 2.3f * m_radius) continue;
+			if (abs(normal[1]) > 2.3f * m_radius) continue;
 
 			float dist = normal.norm();
 
@@ -122,10 +130,18 @@ void ParticleSystem::handleCollisions() {
 
 				m_particles[i].m_velocity = (v2n + v1t);
 				m_particles[j].m_velocity = (v1n + v2t);
+				m_particleVel[i * 2] = m_particles[i].m_velocity[0];
+				m_particleVel[i * 2 + 1] = m_particles[i].m_velocity[1];
+				m_particleVel[j * 2] = m_particles[j].m_velocity[0];
+				m_particleVel[j * 2 + 1] = m_particles[j].m_velocity[1];
 
 				if (m_GRAVITY) {
 					m_particles[i].m_velocity *= DAMPENER;
 					m_particles[j].m_velocity *= DAMPENER;
+					m_particleVel[i * 2] *= DAMPENER;
+					m_particleVel[i * 2 + 1] *= DAMPENER;
+					m_particleVel[j * 2] *= DAMPENER;
+					m_particleVel[j * 2 + 1] *= DAMPENER;
 				}
 			}
 		}
@@ -134,35 +150,47 @@ void ParticleSystem::handleCollisions() {
 	for (unsigned i = 0; i < m_numParticles; ++i) {
 		// Collision with top border
 		if (m_particles[i].m_position[1] > (1.0f - m_radius)) {
+
 			m_particles[i].m_position[1] = (1.0f - m_radius);
+			m_particlePos[i * 2 + 1] = m_particles[i].m_position[1];
 			m_particles[i].m_velocity[1] *= -1.0f;
+			m_particleVel[i * 2 + 1] = m_particles[i].m_velocity[1];
+
 			if (m_GRAVITY)
 				m_particles[i].m_velocity[1] *= DAMPENER;
-			m_particlePos[i * 2 + 1] = (1.0f - m_radius);
 		}
 		// Collision with bottom border
 		if (m_particles[i].m_position[1] < (-1.0f + m_radius)) {
+
 			m_particles[i].m_position[1] = (-1.0f + m_radius);
+			m_particlePos[i * 2 + 1] = m_particles[i].m_position[1];
 			m_particles[i].m_velocity[1] *= -1.0f;
+			m_particleVel[i * 2 + 1] = m_particles[i].m_velocity[1];
+
 			if (m_GRAVITY)
 				m_particles[i].m_velocity[1] *= DAMPENER;
-			m_particlePos[i * 2 + 1] = (-1.0f + m_radius);
 		}
 		// Collision with left border
 		if (m_particles[i].m_position[0] < (-1.0f + m_radius)) {
+
 			m_particles[i].m_position[0] = (-1.0f + m_radius);
+			m_particlePos[i * 2] = m_particles[i].m_position[0];
 			m_particles[i].m_velocity[0] *= -1.0f;
+			m_particleVel[i * 2] = m_particles[i].m_velocity[0];
+
 			if (m_GRAVITY)
 				m_particles[i].m_velocity[0] *= DAMPENER;
-			m_particlePos[i * 2] = (-1.0f + m_radius);
 		}
 		// Collision with right border
 		if (m_particles[i].m_position[0] > (1.0f - m_radius)) {
+
 			m_particles[i].m_position[0] = (1.0f - m_radius);
+			m_particlePos[i * 2] = m_particles[i].m_position[0];
 			m_particles[i].m_velocity[0] *= -1.0f;
+			m_particleVel[i * 2] = m_particles[i].m_velocity[0];
+
 			if (m_GRAVITY)
 				m_particles[i].m_velocity[0] *= DAMPENER;
-			m_particlePos[i * 2] = (1.0f - m_radius);
 		}
 	}
 }
@@ -178,7 +206,7 @@ float* ParticleSystem::getParticleColor() {
 }
 
 // Returns whether or not the particle system is running
-bool ParticleSystem::isRunning() {
+bool ParticleSystem::isRunning() const {
 	return m_RUNNING;
 }
 
@@ -196,6 +224,8 @@ void ParticleSystem::toggleGravity() {
 		for (unsigned i = 0; i < m_numParticles; ++i) {
 			m_particles[i].m_velocity[0] = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
 			m_particles[i].m_velocity[1] = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+			m_particleVel[i * 2] = m_particles[i].m_velocity[0];
+			m_particleVel[i * 2 + 1] = m_particles[i].m_velocity[1];
 		}
 	}
 	else {

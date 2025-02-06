@@ -1,5 +1,4 @@
 #version 460 core
-//precision highp float;
 
 out vec4 FragColor; 
 
@@ -18,5 +17,4 @@ void main() {
 			FragColor = vec4(ParticleColors[i].x, ParticleColors[i].y, ParticleColors[i].z, 1.0f);
 		}
 	}
-
 }

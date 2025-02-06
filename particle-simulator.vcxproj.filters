@@ -16,6 +16,9 @@
     <Filter Include="Source Files\Shaders">
       <UniqueIdentifier>{9e88a33e-8f85-47ec-962d-e969c7d6805b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Cuda">
+      <UniqueIdentifier>{92476fb9-cf29-4ef5-b5f2-3a1a87f7ecf6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Shader.cpp">
@@ -62,5 +65,13 @@
     <ClInclude Include="include\Particle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="Cuda\Kernel.cu">
+      <Filter>Source Files\Cuda</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Cuda\Kernel.cuh">
+      <Filter>Source Files\Cuda</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

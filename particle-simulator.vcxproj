@@ -54,6 +54,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.8.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -71,12 +72,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>C:\Windows\System32\opengl32.dll;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
-    <IncludePath>C:\Users\kyngo\Downloads\glfw-3.4\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>C:\Windows\System32\opengl32.dll;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\lib</LibraryPath>
+    <IncludePath>C:\Users\kyngo\Downloads\glfw-3.4\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\kyngo\Downloads\glfw-3.4\include;C:\Users\kyngo\Downloads\glad\include</IncludePath>
-    <LibraryPath>C:\Windows\System32\opengl32.dll;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <IncludePath>C:\Users\kyngo\Downloads\glfw-3.4\include;C:\Users\kyngo\Downloads\glad\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\include;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\include</IncludePath>
+    <LibraryPath>C:\Windows\System32\opengl32.dll;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -157,11 +158,16 @@
     <None Include="Shaders\vert.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <CudaCompile Include="Cuda\Kernel.cuh" />
     <ClInclude Include="include\Particle.h" />
     <ClInclude Include="include\ParticleSystem.h" />
     <ClInclude Include="include\Shader.h" />
   </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="Cuda\Kernel.cu" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.8.targets" />
   </ImportGroup>
 </Project>

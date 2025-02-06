@@ -1,7 +1,7 @@
 #include "../include/Particle.h"
 
 /// Initializes position, velocity, acceleration, and color of particle
-Particle::Particle(float x, float y, float vx, float vy, float r, float g, float b, float radius) {
+Particle::Particle(float x, float y, float vx, float vy, float r, float g, float b) {
 	m_position[0] = x;
 	m_position[1] = y;
 	m_previousPosition[0] = x;
@@ -13,22 +13,12 @@ Particle::Particle(float x, float y, float vx, float vy, float r, float g, float
 	m_color[0] = r;
 	m_color[1] = g;
 	m_color[2] = b;
-
-	m_radius = radius;
 }
 
 /// Handles movement of particle
 void Particle::updateMovement(float deltaTime, bool verlet, bool gravity) {
 	if (verlet) {
-		Eigen::Vector2f velocity = m_position - m_previousPosition;
-		// Check Border Collisions
-		if (m_position[1] < (-1.0f + m_radius)) {
-			m_position[1] = (-1.0f + m_radius);
-			velocity *= -1;
-		}
-
-		m_previousPosition = m_position;
-		m_position = m_position + velocity + m_acceleration * deltaTime * deltaTime;
+		
 	}
 	else {
 		if (gravity)

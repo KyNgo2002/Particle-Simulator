@@ -5,7 +5,6 @@
 class Particle {
 public:
 	// Particle information
-	float m_radius;
 
 	Eigen::Vector2f m_position;
 	Eigen::Vector2f m_previousPosition;
@@ -14,7 +13,7 @@ public:
 	Eigen::Vector3f m_color;
 
 	// Constructor
-	Particle(float x, float y, float vx, float vy, float r, float g, float b, float radius);
+	Particle(float x, float y, float vx, float vy, float r, float g, float b);
 
 	// Particle system logic
 	void updateMovement(float deltaTime, bool verlet, bool gravity);

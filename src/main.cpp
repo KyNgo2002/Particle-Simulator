@@ -8,7 +8,7 @@
 #include "../include/Shader.h"
 
 const unsigned int WINDOW_SIZE = 800;
-const unsigned int NUM_PARTICLES = 500;
+const unsigned int NUM_PARTICLES = 100;
 const float RADIUS = 0.01f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -33,6 +33,9 @@ int main() {
 		return -1;
 	}
 
+	// Turn off vSync manually
+	glfwSwapInterval(0);
+
 	// Context 
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -43,14 +46,18 @@ int main() {
 		return -1;
 	}
 
+	int maxUniformComponents;
+	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &maxUniformComponents);
+	std::cout << "Max fragment uniform components: " << maxUniformComponents << std::endl;
+
 	const GLubyte* version = glGetString(GL_VERSION);
-	std::cout << "OpenGL Versions: " << version << std::endl;
+	std::cout << "OpenGL Versions:  " << version << std::endl;
 
 	// Shader Program initialization
 	Shader shaderProgram("shaders/vert.glsl", "shaders/frag.glsl", "shaders/compute.glsl");
 
 	// Regular vs testing constructor
-	ParticleSystem particleSystem(NUM_PARTICLES, WINDOW_SIZE, RADIUS);
+	ParticleSystem particleSystem(NUM_PARTICLES, WINDOW_SIZE, RADIUS, true);
 
 	float vertices[] = {
 		-1.0f, -1.0f, 0.0f,		// bottom left  
