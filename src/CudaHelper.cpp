@@ -14,7 +14,9 @@
         } \
     } while (0)
 
-CudaHelper::CudaHelper() {
+CudaHelper::CudaHelper() : h_particlePos (nullptr), h_particleVel (nullptr), d_particlePos (nullptr), d_particleVel (nullptr) {
+    m_GRAVITY = false;
+    m_numParticles = 0;
 }
 
 CudaHelper::CudaHelper(unsigned numParticles, bool gravity, float* h_particlePos, float* h_particleVel) : m_numParticles( numParticles ), m_GRAVITY( gravity ), d_particlePos( nullptr ), d_particleVel( nullptr )  {

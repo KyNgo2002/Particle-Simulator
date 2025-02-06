@@ -205,6 +205,7 @@ void ParticleSystem::toggleRunning() {
 // Toggles Gravity
 void ParticleSystem::toggleGravity() {
 	m_GRAVITY = !m_GRAVITY;
+	cudaHelper.m_GRAVITY = this->m_GRAVITY;
 	std::cout << "Gravity: ";
 	if (m_GRAVITY) {
 		std::cout << "ON" << std::endl;

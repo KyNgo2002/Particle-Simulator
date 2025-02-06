@@ -27,16 +27,6 @@ void launchMovementKernel(CudaHelper& cudaHelper, float deltaTime) {
 
 	unsigned numBlocks = (cudaHelper.m_numParticles + blockSize - 1) / blockSize; 
 
-	/*// Kernel launch preprocessing
-    float* d_particlePos;
-    float* d_particleVel; 
-
-    // Memory allocation: Device
-    cudaMalloc(&d_particlePos, numParticles * 2 * sizeof(float));
-    cudaCheckErrors("Malloc failure: Particle Positions");
-    cudaMalloc(&d_particleVel, numParticles * 2 * sizeof(float));
-    cudaCheckErrors("Malloc failure: Particle Velocities"); */
-
     // Memory copy: Host to device
     cudaMemcpy(cudaHelper.d_particlePos, cudaHelper.h_particlePos, cudaHelper.m_numParticles * 2 * sizeof(float), cudaMemcpyHostToDevice);
     cudaCheckErrors("Memcpy failure: Particle Positions host to device");
@@ -53,11 +43,5 @@ void launchMovementKernel(CudaHelper& cudaHelper, float deltaTime) {
     cudaCheckErrors("Memcpy failure: Particle Positions device to host");
     cudaMemcpy(cudaHelper.h_particleVel, cudaHelper.d_particleVel, cudaHelper.m_numParticles * 2 * sizeof(float), cudaMemcpyDeviceToHost);
     cudaCheckErrors("Memcpy failure: Particle Velocities device to host");
-
-    /*cudaFree(d_particlePos);
-    cudaCheckErrors("Free failure: Particle Positions");
-    cudaFree(d_particleVel);
-    cudaCheckErrors("Free failure: Particle Velocities");*/
-
 
 }
