@@ -57,7 +57,7 @@ int main() {
 	Shader shaderProgram("shaders/vert.glsl", "shaders/frag.glsl", "shaders/compute.glsl");
 
 	// Regular vs testing constructor
-	ParticleSystem particleSystem(NUM_PARTICLES, WINDOW_SIZE, RADIUS, true);
+	ParticleSystem particleSystem(NUM_PARTICLES, WINDOW_SIZE, RADIUS, false);
 
 	float vertices[] = {
 		-1.0f, -1.0f, 0.0f,		// bottom left  

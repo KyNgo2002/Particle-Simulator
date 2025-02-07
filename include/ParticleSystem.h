@@ -53,7 +53,6 @@ public:
 	// Particle System logic
 	void simulate(float deltaTime);
 	void handleMovement(float deltaTime);
-	void handleCollisionsEigen();
 	void handleCollisions();
 
 	// Debugging tools
