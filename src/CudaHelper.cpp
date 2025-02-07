@@ -21,8 +21,13 @@ CudaHelper::CudaHelper()
 CudaHelper::CudaHelper(unsigned numParticles, float radius, bool gravity, Particle* particles) 
     : m_numParticles(numParticles), m_radius(radius), m_GRAVITY(gravity), h_particles (particles) {
 
+    // Allocate space on the GPU
     cudaMalloc(&d_particles, m_numParticles * sizeof(Particle));
     cudaCheckErrors("Malloc failure: Particles");
+
+    // Memory copy: Host to device
+    cudaMemcpy(d_particles, h_particles, numParticles * sizeof(Particle), cudaMemcpyHostToDevice);
+    cudaCheckErrors("Memcpy failure -> Particle collisions host to device");
 }
 
 CudaHelper::~CudaHelper() {

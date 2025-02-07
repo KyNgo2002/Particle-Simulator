@@ -1,4 +1,5 @@
 #include "Kernel.cuh"
+#include <iostream>
 
 #define cudaCheckErrors(msg) \
     do { \
@@ -218,10 +219,6 @@ void launchCollisionsKernelEigen(CudaHelper& cudaHelper) {
 void launchBothKernelEigen(CudaHelper& cudaHelper, float deltaTime) {
     unsigned numParticles = cudaHelper.m_numParticles;
     unsigned numBlocks = (numParticles + blockSize - 1) / blockSize;
-
-    // Memory copy: Host to device
-    cudaMemcpy(cudaHelper.d_particles, cudaHelper.h_particles, numParticles * sizeof(Particle), cudaMemcpyHostToDevice);
-    cudaCheckErrors("Memcpy failure -> Particle collisions host to device");
 
     // Kernel Launch
     handleBothKernelEigen <<< numBlocks, blockSize >>> (numParticles, cudaHelper.m_radius, deltaTime, cudaHelper.d_particles, cudaHelper.m_GRAVITY);

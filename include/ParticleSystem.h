@@ -29,7 +29,7 @@ private:
 
 	// Particle containers
 	std::vector<Particle> m_particles;
-	
+
 	std::vector<float> m_particlePos;
 	std::vector<float> m_particleVel;
 	std::vector<float> m_particleColor;

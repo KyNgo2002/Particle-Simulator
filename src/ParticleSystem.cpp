@@ -56,9 +56,9 @@ void ParticleSystem::simulate(float deltaTime){
 	for (unsigned i = 0; i < SUBSTEPS; ++i) {
 		if (m_CUDA_ENABLED) {
 			launchBothKernelEigen(cudaHelper, subDeltaTime);
-			for (unsigned i = 0; i < m_numParticles; ++i) {
-				m_particlePos[i * 2] = m_particles[i].m_position[0];
-				m_particlePos[i * 2 + 1] = m_particles[i].m_position[1];
+			for (unsigned j = 0; j < m_numParticles; ++j) {
+				m_particlePos[j * 2] = m_particles[j].m_position[0];
+				m_particlePos[j * 2 + 1] = m_particles[j].m_position[1];
 			}
 		}
 		else {
@@ -214,9 +214,8 @@ void ParticleSystem::toggleGravity() {
 			m_particleVel[i * 2 + 1] = m_particles[i].m_velocity[1];
 		}
 	}
-	else {
+	else 
 		std::cout << "OFF" << std::endl;
-	}
 }
 
 
