@@ -41,11 +41,8 @@ ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float
 		}
 	}
 
-	if (m_EIGEN_ENABLED)
-		cudaHelper = CudaHelper(m_numParticles, m_GRAVITY, m_particles.data());
-	else
-		cudaHelper = CudaHelper(m_numParticles, m_GRAVITY, m_particlePos.data(), m_particleVel.data());
-
+	if (m_CUDA_ENABLED)
+		cudaHelper = CudaHelper(m_numParticles, m_radius, m_GRAVITY, m_particles.data());
 }
 
 // Cleans up particle system
@@ -57,44 +54,30 @@ ParticleSystem::~ParticleSystem() {
 void ParticleSystem::simulate(float deltaTime){
 	float subDeltaTime = deltaTime / SUBSTEPS;
 	for (unsigned i = 0; i < SUBSTEPS; ++i) {
-		if (m_CUDA_ENABLED)
-			launchCollisionsKernel(cudaHelper, deltaTime);
-		else
+		if (m_CUDA_ENABLED) {
+			launchBothKernelEigen(cudaHelper, subDeltaTime);
+			for (unsigned i = 0; i < m_numParticles; ++i) {
+				m_particlePos[i * 2] = m_particles[i].m_position[0];
+				m_particlePos[i * 2 + 1] = m_particles[i].m_position[1];
+			}
+		}
+		else {
+			handleMovement(subDeltaTime);
 			handleCollisions();
-		handleMovement(subDeltaTime);
+		}
 	}
 }
 
 // Handles particle movement
 void ParticleSystem::handleMovement(float deltaTime) {
-	if (m_CUDA_ENABLED) {
-		if (m_EIGEN_ENABLED) {
-			launchMovementKernelEigen(cudaHelper, deltaTime);
-			for (unsigned i = 0; i < m_numParticles; ++i) {
-				m_particlePos[i * 2] = m_particles[i].m_position[0];
-				m_particlePos[i * 2 + 1] = m_particles[i].m_position[1];
-				m_particleVel[i * 2 + 1] = m_particles[i].m_velocity[1];
-			}
+	for (unsigned i = 0; i < m_numParticles; ++i) {
+		if (m_GRAVITY) {
+			m_particles[i].m_velocity[1] -= GRAVITY * deltaTime;
+			m_particleVel[i * 2 + 1] -= GRAVITY * deltaTime;
 		}
-		else {
-			launchMovementKernel(cudaHelper, deltaTime);
-			for (unsigned i = 0; i < m_numParticles; ++i) {
-				m_particles[i].m_position[0] = m_particlePos[i * 2];
-				m_particles[i].m_position[1] = m_particlePos[i * 2 + 1];
-				m_particles[i].m_velocity[1] = m_particleVel[i * 2 + 1];
-			}
-		}
-	}
-	else {
-		for (unsigned i = 0; i < m_numParticles; ++i) {
-			if (m_GRAVITY) {
-				m_particles[i].m_velocity[1] -= GRAVITY * deltaTime;
-				m_particleVel[i * 2 + 1] -= GRAVITY * deltaTime;
-			}
-			m_particles[i].m_position += m_particles[i].m_velocity * deltaTime;
-			m_particlePos[i * 2] = m_particles[i].m_position[0];
-			m_particlePos[i * 2 + 1] = m_particles[i].m_position[1];
-		}
+		m_particles[i].m_position += m_particles[i].m_velocity * deltaTime;
+		m_particlePos[i * 2] = m_particles[i].m_position[0];
+		m_particlePos[i * 2 + 1] = m_particles[i].m_position[1];
 	}
 }
 

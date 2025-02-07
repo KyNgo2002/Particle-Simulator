@@ -21,7 +21,7 @@ private:
 	bool m_GRAVITY = false; // True = gravity acting on particles
 	bool m_VERLET  = true;
 	bool m_CUDA_ENABLED = false;
-	bool m_EIGEN_ENABLED = false;
+	bool m_EIGEN_ENABLED = true;
 
 	// MISC particle information
 	unsigned int m_numParticles;

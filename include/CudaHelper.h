@@ -7,18 +7,16 @@
 class CudaHelper {
 public:
 	unsigned m_numParticles;
+	float m_radius;
+
 	bool m_GRAVITY;
-	float* h_particlePos;
-	float* h_particleVel;
-	float* d_particlePos;
-	float* d_particleVel;
+
 	Particle* h_particles;
 	Particle* d_particles;
 
 	
 	CudaHelper();
-    CudaHelper(unsigned numParticles, bool gravity, float* h_particlePos, float* h_particleVel);
-	CudaHelper(unsigned numParticles, bool gravity, Particle* h_particles);
+	CudaHelper(unsigned numParticles, float radius, bool gravity, Particle* h_particles);
 
 	~CudaHelper();
 	void clean();
