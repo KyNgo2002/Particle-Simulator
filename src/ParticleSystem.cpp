@@ -41,7 +41,10 @@ ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float
 		}
 	}
 
-	cudaHelper = CudaHelper(m_numParticles, m_GRAVITY, m_particlePos.data(), m_particleVel.data());
+	if (m_EIGEN_ENABLED)
+		cudaHelper = CudaHelper(m_numParticles, m_GRAVITY, m_particles.data());
+	else
+		cudaHelper = CudaHelper(m_numParticles, m_GRAVITY, m_particlePos.data(), m_particleVel.data());
 
 }
 
@@ -54,7 +57,7 @@ ParticleSystem::~ParticleSystem() {
 void ParticleSystem::simulate(float deltaTime){
 	float subDeltaTime = deltaTime / SUBSTEPS;
 	for (unsigned i = 0; i < SUBSTEPS; ++i) {
-		handleCollisions();
+		handleCollisionsEigen();
 		handleMovement(subDeltaTime);
 	}
 }
@@ -62,12 +65,23 @@ void ParticleSystem::simulate(float deltaTime){
 // Handles particle movement
 void ParticleSystem::handleMovement(float deltaTime) {
 	if (m_CUDA_ENABLED) {
-		launchMovementKernel(cudaHelper, deltaTime);
-		for (unsigned i = 0; i < m_numParticles; ++i) {
-			m_particles[i].m_position[0] = m_particlePos[i * 2];
-			m_particles[i].m_position[1] = m_particlePos[i * 2 + 1];
+		if (m_EIGEN_ENABLED) {
+			launchMovementKernelEigen(cudaHelper, deltaTime);
+			for (unsigned i = 0; i < m_numParticles; ++i) {
+				m_particlePos[i * 2] = m_particles[i].m_position[0];
+				m_particlePos[i * 2 + 1] = m_particles[i].m_position[1];
 
-			m_particles[i].m_velocity[1] = m_particleVel[i * 2 + 1];
+				m_particleVel[i * 2 + 1] = m_particles[i].m_velocity[1];
+			}
+		}
+		else {
+			launchMovementKernel(cudaHelper, deltaTime);
+			for (unsigned i = 0; i < m_numParticles; ++i) {
+				m_particles[i].m_position[0] = m_particlePos[i * 2];
+				m_particles[i].m_position[1] = m_particlePos[i * 2 + 1];
+
+				m_particles[i].m_velocity[1] = m_particleVel[i * 2 + 1];
+			}
 		}
 	}
 	else {
@@ -84,7 +98,8 @@ void ParticleSystem::handleMovement(float deltaTime) {
 }
 
 // Handles particle collisions
-void ParticleSystem::handleCollisions() {
+// Eigen Arithmetic
+void ParticleSystem::handleCollisionsEigen() {
 	// Particle->Particle Collision
 	for (unsigned i = 0; i < m_numParticles; ++i) {
 		for (unsigned j = i + 1; j < m_numParticles; ++j) {
@@ -178,6 +193,116 @@ void ParticleSystem::handleCollisions() {
 
 			if (m_GRAVITY)
 				m_particles[i].m_velocity[0] *= DAMPENER;
+		}
+	}
+}
+
+// Handles particle collisions
+// Eigen Arithmetic
+void ParticleSystem::handleCollisions() {
+	// Particle->Particle Collision
+	for (unsigned i = 0; i < m_numParticles; ++i) {
+		for (unsigned j = i + 1; j < m_numParticles; ++j) {
+			float x = abs(m_particlePos[i * 2] - m_particlePos[j * 2]);
+			float y = abs(m_particlePos[i * 2 + 1] - m_particlePos[j * 2 + 1]);
+
+			// Optimization
+			if (abs(x) > 2.3f * m_radius) continue;
+			if (abs(y) > 2.3f * m_radius) continue;
+
+			//float dist = normal.norm();
+			float dist = sqrt(x * x + y * x);
+			// Collision occured
+			if (dist < (2.0f * m_radius)) {
+				float normalizedX = x / dist;
+				float normalizedY = y / dist;
+
+				// Position update
+				float delta = 0.5f * (2.0f * m_radius - dist);
+				m_particlePos[i * 2] += delta * x;
+				m_particlePos[i * 2 + 1] += delta * y;
+
+				m_particlePos[j * 2] -= delta * x;
+				m_particlePos[j * 2 + 1] -= delta * y;
+
+				// Velocity Update
+				float v1nx = (m_particleVel[i * 2] * normalizedX) / (dist * dist) * normalizedX;
+				float v1ny = (m_particleVel[i * 2 + 1] * normalizedY) / (dist * dist) * normalizedY;
+				float v1tx = m_particleVel[i * 2] - v1nx;
+				float v1ty = m_particleVel[i * 2 + 1] - v1ny;
+
+				float v2nx = (m_particleVel[j * 2] * normalizedX) / (dist * dist) * normalizedX;
+				float v2ny = (m_particleVel[j * 2 + 1] * normalizedY) / (dist * dist) * normalizedY;
+				float v2tx = m_particleVel[j * 2] - v2nx;
+				float v2ty = m_particleVel[j * 2 + 1] - v2ny;
+
+				m_particleVel[i * 2] = v2nx + v1tx;
+				m_particleVel[i * 2 + 1] = v2ny + v1ty;
+				m_particleVel[j * 2] = v1nx + v2tx;
+				m_particleVel[j * 2 + 1] = v1ny + v2ty;
+
+				if (m_GRAVITY) {
+					m_particleVel[i * 2] *= DAMPENER;
+					m_particleVel[i * 2 + 1] *= DAMPENER;
+					m_particleVel[j * 2] *= DAMPENER;
+					m_particleVel[j * 2 + 1] *= DAMPENER;
+				}
+			}
+		}
+	}
+
+	for (unsigned i = 0; i < m_numParticles; ++i) {
+		// Collision with top border
+		if (m_particles[i].m_position[1] > (1.0f - m_radius)) {
+
+			//m_particles[i].m_position[1] = (1.0f - m_radius);
+			m_particlePos[i * 2 + 1] = m_particles[i].m_position[1];
+			//m_particles[i].m_velocity[1] *= -1.0f;
+			m_particleVel[i * 2 + 1] = m_particles[i].m_velocity[1];
+
+			if (m_GRAVITY) {
+				m_particles[i].m_velocity[1] *= DAMPENER;
+				m_particleVel[i * 2 + 1] *= DAMPENER;
+			}
+		}
+		// Collision with bottom border
+		if (m_particles[i].m_position[1] < (-1.0f + m_radius)) {
+
+			//m_particles[i].m_position[1] = (-1.0f + m_radius);
+			m_particlePos[i * 2 + 1] = m_particles[i].m_position[1];
+			//m_particles[i].m_velocity[1] *= -1.0f;
+			m_particleVel[i * 2 + 1] = m_particles[i].m_velocity[1];
+
+			if (m_GRAVITY) {
+				m_particles[i].m_velocity[1] *= DAMPENER;
+				m_particleVel[i * 2 + 1] *= DAMPENER;
+			}
+		}
+		// Collision with left border
+		if (m_particles[i].m_position[0] < (-1.0f + m_radius)) {
+
+			//m_particles[i].m_position[0] = (-1.0f + m_radius);
+			m_particlePos[i * 2] = m_particles[i].m_position[0];
+			//m_particles[i].m_velocity[0] *= -1.0f;
+			m_particleVel[i * 2] = m_particles[i].m_velocity[0];
+
+			if (m_GRAVITY) {
+				m_particles[i].m_velocity[0] *= DAMPENER;
+				m_particleVel[i * 2] *= DAMPENER;
+			}
+		}
+		// Collision with right border
+		if (m_particles[i].m_position[0] > (1.0f - m_radius)) {
+
+			//m_particles[i].m_position[0] = (1.0f - m_radius);
+			m_particlePos[i * 2] = m_particles[i].m_position[0];
+			//m_particles[i].m_velocity[0] *= -1.0f;
+			m_particleVel[i * 2] = m_particles[i].m_velocity[0];
+
+			if (m_GRAVITY) {
+				m_particles[i].m_velocity[0] *= DAMPENER;
+				m_particleVel[i * 2] *= DAMPENER;
+			}
 		}
 	}
 }

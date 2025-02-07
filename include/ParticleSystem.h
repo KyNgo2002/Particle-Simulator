@@ -21,6 +21,7 @@ private:
 	bool m_GRAVITY = false; // True = gravity acting on particles
 	bool m_VERLET  = true;
 	bool m_CUDA_ENABLED = false;
+	bool m_EIGEN_ENABLED = false;
 
 	// MISC particle information
 	unsigned int m_numParticles;
@@ -42,7 +43,6 @@ public:
 	ParticleSystem(unsigned numParticles, unsigned windowSize, float radius, bool enableCuda);
 	~ParticleSystem();
 
-
 	// Set and get particle system state
 	float* getParticlePos();
 	float* getParticleColor();
@@ -53,6 +53,7 @@ public:
 	// Particle System logic
 	void simulate(float deltaTime);
 	void handleMovement(float deltaTime);
+	void handleCollisionsEigen();
 	void handleCollisions();
 
 	// Debugging tools
