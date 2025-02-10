@@ -46,6 +46,7 @@ public:
 	// Set and get particle system state
 	float* getParticlePos();
 	float* getParticleColor();
+
 	bool isRunning() const;
 	void toggleRunning();
 	void toggleGravity();

@@ -120,10 +120,27 @@ int main() {
 	glUniform3fv(particleColorsLoc, NUM_PARTICLES, particleSystem.getParticleColor());
 	std::cout << "UNIFORM LOCATION::ParticleColors -> " << particleColorsLoc << std::endl;
 
+	// SSBO for particles
+	/*unsigned int SSBO_ParticlePos;
+	glGenBuffers(1, &SSBO_ParticlePos);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_ParticlePos);
+	glBufferData(SSBO_ParticlePos, NUM_PARTICLES * 2 * sizeof(float), particleSystem.getParticlePos(), GL_DYNAMIC_DRAW);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, SSBO_ParticlePos);*/
+
+
+	// SSBO for particle colors
+	unsigned int SSBO_ParticleColor;
+	glGenBuffers(1, &SSBO_ParticleColor);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_ParticleColor);
+	glBufferData(SSBO_ParticleColor, NUM_PARTICLES * 3 * sizeof(float), particleSystem.getParticleColor(), GL_STATIC_DRAW);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, SSBO_ParticleColor);
+
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
 	GLenum err;
+
+	
 
 	auto prevTime = GetTickCount64();
 	auto currTime = GetTickCount64();
@@ -132,6 +149,7 @@ int main() {
 	long long totalFrames = 0;
 
 	while (!glfwWindowShouldClose(window)) {
+		
 		processInput(window, particleSystem);
 
 		// Set color to clear color buffer	
@@ -162,6 +180,11 @@ int main() {
 	while ((err = glGetError()) != GL_NO_ERROR) 
 		std::cout << "OpenGL Error: " << err << std::endl;
 	
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback([](GLenum, GLenum, GLuint, GLenum severity, GLsizei, const GLchar* message, const void*) {
+		std::cerr << "GL Debug: " << message << std::endl;
+		}, nullptr);
+
 	// Cleanup buffers and shaders
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
