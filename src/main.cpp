@@ -54,7 +54,7 @@ int main() {
 	std::cout << "OpenGL Versions:  " << version << std::endl;
 
 	// Shader Program initialization
-	Shader shaderProgram("shaders/vert.glsl", "shaders/frag.glsl", "shaders/compute.glsl");
+	Shader shaderProgram("shaders/vert.glsl", "shaders/frag.glsl");
 
 	// Regular vs testing constructor
 	ParticleSystem particleSystem(NUM_PARTICLES, WINDOW_SIZE, RADIUS, true);
@@ -116,31 +116,29 @@ int main() {
 	glUniform2fv(particlePosLoc, NUM_PARTICLES, particleSystem.getParticlePos());
 	std::cout << "UNIFORM LOCATION::ParticleCoords -> " << particlePosLoc << std::endl;
 
-	int particleColorsLoc = glGetUniformLocation(shaderProgram.shaderProgramID, "ParticleColors");
+	/*int particleColorsLoc = glGetUniformLocation(shaderProgram.shaderProgramID, "ParticleColors");
 	glUniform3fv(particleColorsLoc, NUM_PARTICLES, particleSystem.getParticleColor());
-	std::cout << "UNIFORM LOCATION::ParticleColors -> " << particleColorsLoc << std::endl;
+	std::cout << "UNIFORM LOCATION::ParticleColors -> " << particleColorsLoc << std::endl;*/
 
 	// SSBO for particles
-	/*unsigned int SSBO_ParticlePos;
-	glGenBuffers(1, &SSBO_ParticlePos);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_ParticlePos);
-	glBufferData(SSBO_ParticlePos, NUM_PARTICLES * 2 * sizeof(float), particleSystem.getParticlePos(), GL_DYNAMIC_DRAW);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, SSBO_ParticlePos);*/
+	//unsigned int SSBO_ParticlePos;
+	//glGenBuffers(1, &SSBO_ParticlePos);
+	//glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_ParticlePos);
+	//glBufferData(GL_SHADER_STORAGE_BUFFER, NUM_PARTICLES * 2 * sizeof(float), particleSystem.getParticlePos(), GL_DYNAMIC_DRAW);
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, SSBO_ParticlePos);
 
 
 	// SSBO for particle colors
 	unsigned int SSBO_ParticleColor;
 	glGenBuffers(1, &SSBO_ParticleColor);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_ParticleColor);
-	glBufferData(SSBO_ParticleColor, NUM_PARTICLES * 3 * sizeof(float), particleSystem.getParticleColor(), GL_STATIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, NUM_PARTICLES * 3 * sizeof(float), particleSystem.getParticleColor(), GL_STATIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, SSBO_ParticleColor);
 
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
 	GLenum err;
-
-	
 
 	auto prevTime = GetTickCount64();
 	auto currTime = GetTickCount64();

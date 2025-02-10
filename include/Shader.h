@@ -9,7 +9,7 @@ public:
 	// Shader Program ID
 	unsigned int shaderProgramID;
 
-	Shader(const char* vertexSource, const char* fragSource, const char* computeSource);
+	Shader(const char* vertexSource, const char* fragSource);
 	void clean();
 	void use();
 };

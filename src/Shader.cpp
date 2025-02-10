@@ -2,18 +2,15 @@
 #include <iostream>
 #include <sstream>
 
-Shader::Shader(const char* vertexSource, const char* fragSource, const char* computeSource) {
+Shader::Shader(const char* vertexSource, const char* fragSource) {
 	std::ifstream vShaderFile;
 	std::ifstream fShaderFile;
-	std::ifstream cShaderFile;
 	std::string vertString;
 	std::string fragString;
-	std::string computeString;
 	
 	try {
 		vShaderFile.open(vertexSource);
 		fShaderFile.open(fragSource);
-		//cShaderFile.open(computeSource);
 
 		if (!vShaderFile.is_open())
 			std::cerr << "ERROR: Could not open vertex shader file" << std::endl;
@@ -23,24 +20,18 @@ Shader::Shader(const char* vertexSource, const char* fragSource, const char* com
 			std::cerr << "ERROR: could not open fragment shader file" << std::endl;
 		else
 			std::cout << "SUCCESS: Loaded fragment Shader" << std::endl;
-		/*if (!cShaderFile.is_open())
-			std::cerr << "ERROR: could not open compute shader file" << std::endl;
-		else
-			std::cout << "SUCCESS: Loaded compute Shader" << std::endl;*/
+		
 
 		// Initialize string streams to read from shader files
 		std::stringstream vStream, fStream, cStream;
 		vStream << vShaderFile.rdbuf();
 		fStream << fShaderFile.rdbuf();
-		//cStream << cShaderFile.rdbuf();
 
 		vShaderFile.close();
 		fShaderFile.close();
-		//cShaderFile.close();
 
 		vertString = vStream.str();
 		fragString = fStream.str();
-		//computeString = cStream.str();
 	}
 	catch (std::ifstream::failure err){
 		std::cerr << "ERROR: Shader file unsuccessfully read" << std::endl;
@@ -48,7 +39,6 @@ Shader::Shader(const char* vertexSource, const char* fragSource, const char* com
 	
 	const char* vertCode = vertString.c_str();
 	const char* fragCode = fragString.c_str();
-	//const char* computeCode = computeString.c_str();
 
 	// Vertex Shader initialization
 	int vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -76,23 +66,11 @@ Shader::Shader(const char* vertexSource, const char* fragSource, const char* com
 		std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
 
-	//// Compute shader initialization
-	//unsigned int computeShader = glCreateShader(GL_COMPUTE_SHADER);
-	//glShaderSource(computeShader, 1, &computeCode, NULL);
-	//glCompileShader(computeShader);
-	//
-	//// Fragment Shader compilation error checking
-	//if (!success) {
-	//	glGetShaderInfoLog(computeShader, 512, NULL, infoLog);
-	//	std::cerr << "ERROR::SHADER::COMPUTE::COMPILATION_FAILED\n" << infoLog << std::endl;
-	//}
-
 	// Linked both/all compiled shaders objects into final shader program object;
 	shaderProgramID = glCreateProgram();
 	std::cout << "ShaderProgramID: -> " << shaderProgramID << std::endl;
 	glAttachShader(shaderProgramID, vertexShader);
 	glAttachShader(shaderProgramID, fragmentShader);
-	//glAttachShader(shaderProgramID, computeShader);
 	glLinkProgram(shaderProgramID);
 
 	// Error checking final shader program linking
@@ -105,7 +83,6 @@ Shader::Shader(const char* vertexSource, const char* fragSource, const char* com
 	// Clean up shader objects
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
-	//glDeleteShader(computeShader);
 }
 
 void Shader::clean() {
