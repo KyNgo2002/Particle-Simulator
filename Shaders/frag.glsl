@@ -15,6 +15,7 @@ void main() {
 		float dist = distance(fragCoord, vec2(ParticleCoords[i][0], ParticleCoords[i][1]));
 		if (dist <= Radius) {
 			FragColor = vec4(ParticleColors[i].x, ParticleColors[i].y, ParticleColors[i].z, 1.0f);
+			break;
 		}
 	}
 }
