@@ -107,7 +107,7 @@ __global__ void handleBothKernelEigen(unsigned numParticles, float radius, float
     if (tid < numParticles) {
         // Movement
         if (GRAVITY) {
-            particles[tid].m_position[1] -= 10.0f * deltaTime;
+            particles[tid].m_position[1] -= 1.0f * deltaTime;
         }
         particles[tid].m_position += particles[tid].m_velocity * deltaTime;
 

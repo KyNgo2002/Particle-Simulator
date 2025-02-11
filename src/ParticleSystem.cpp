@@ -36,11 +36,34 @@ ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float
 			m_particleColor[i * 30 + j * 3] = r;
 			m_particleColor[i * 30 + j * 3 + 1] = g;
 			m_particleColor[i * 30 + j * 3 + 2] = b;
-
+			
 			count--;
 		}
 	}
+	//float x = 0.0f;
+	//float y = 0.0f;
+	//for (int i = 0; i < m_numParticles; ++i) {
 
+	//	float x = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+	//	float y = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+	//	float vx = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+	//	float vy = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+
+	//	float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+	//	float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+	//	float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+	//	m_particles.push_back(Particle(x, y, vx, vy));
+
+	//	m_particlePos[i * 2] = x;
+	//	m_particlePos[i * 2 + 1] = y;
+	//	m_particleVel[i * 2] = vx;
+	//	m_particleVel[i * 2 + 1] = vy;
+	//	m_particleColor[i * 3] = r;
+	//	m_particleColor[i * 3 + 1] = g;
+	//	m_particleColor[i * 3 + 2] = b;
+	//	//std::cout << r << " " << g << " " << b << std::endl;
+	//}
 	if (m_CUDA_ENABLED)
 		cudaHelper = CudaHelper(m_numParticles, m_radius, m_GRAVITY, m_particles.data());
 }
