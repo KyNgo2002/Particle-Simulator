@@ -6,11 +6,11 @@ ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float
 
 	m_particlePos = std::vector<float>(m_numParticles * 2);
 	m_particleVel = std::vector<float>(m_numParticles * 2);
-	m_particleColor = std::vector<float>(m_numParticles * 3);
+	m_particleColor = std::vector<float>(m_numParticles * 4);
 
 	m_particles.reserve(numParticles);
 
-	int count = m_numParticles;
+	/*int count = m_numParticles;
 	int rows = m_numParticles / 10 + (m_numParticles % 10 != 0);
 	float x = 0.0f;
 	float y = 0.0f;
@@ -39,31 +39,31 @@ ParticleSystem::ParticleSystem(unsigned numParticles, unsigned windowSize, float
 			
 			count--;
 		}
+	}*/
+	float x = 0.0f;
+	float y = 0.0f;
+	for (int i = 0; i < m_numParticles; ++i) {
+
+		float x = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+		float y = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+		float vx = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+		float vy = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+
+		float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+		m_particles.push_back(Particle(x, y, vx, vy));
+
+		m_particlePos[i * 2] = x;
+		m_particlePos[i * 2 + 1] = y;
+		m_particleVel[i * 2] = vx;
+		m_particleVel[i * 2 + 1] = vy;
+		m_particleColor[i * 4] = r;
+		m_particleColor[i * 4 + 1] = g;
+		m_particleColor[i * 4 + 2] = b;
+		m_particleColor[i * 4 + 3] = 1.0f;
 	}
-	//float x = 0.0f;
-	//float y = 0.0f;
-	//for (int i = 0; i < m_numParticles; ++i) {
-
-	//	float x = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
-	//	float y = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
-	//	float vx = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
-	//	float vy = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
-
-	//	float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-	//	float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-	//	float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-
-	//	m_particles.push_back(Particle(x, y, vx, vy));
-
-	//	m_particlePos[i * 2] = x;
-	//	m_particlePos[i * 2 + 1] = y;
-	//	m_particleVel[i * 2] = vx;
-	//	m_particleVel[i * 2 + 1] = vy;
-	//	m_particleColor[i * 3] = r;
-	//	m_particleColor[i * 3 + 1] = g;
-	//	m_particleColor[i * 3 + 2] = b;
-	//	//std::cout << r << " " << g << " " << b << std::endl;
-	//}
 	if (m_CUDA_ENABLED)
 		cudaHelper = CudaHelper(m_numParticles, m_radius, m_GRAVITY, m_particles.data());
 }

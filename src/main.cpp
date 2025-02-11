@@ -8,7 +8,7 @@
 #include "../include/Shader.h"
 
 const unsigned int WINDOW_SIZE = 800;
-const unsigned int NUM_PARTICLES = 10;
+const unsigned int NUM_PARTICLES = 500;
 const float RADIUS = 0.01f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -57,7 +57,7 @@ int main() {
 	Shader shaderProgram("shaders/vert.glsl", "shaders/frag.glsl");
 
 	// Regular vs testing constructor
-	ParticleSystem particleSystem(NUM_PARTICLES, WINDOW_SIZE, RADIUS, false);
+	ParticleSystem particleSystem(NUM_PARTICLES, WINDOW_SIZE, RADIUS, true);
 
 	float vertices[] = {
 		-1.0f, -1.0f, 0.0f,		// bottom left  
@@ -112,33 +112,27 @@ int main() {
 	glUniform1i(numParticlesLoc, NUM_PARTICLES);
 	std::cout << "UNIFORM LOCATION::NumParticles -> " << numParticlesLoc << std::endl;
 
-	/*int particlePosLoc = glGetUniformLocation(shaderProgram.shaderProgramID, "ParticleCoords");
+	int particlePosLoc = glGetUniformLocation(shaderProgram.shaderProgramID, "ParticleCoords");
 	glUniform2fv(particlePosLoc, NUM_PARTICLES, particleSystem.getParticlePos());
-	std::cout << "UNIFORM LOCATION::ParticleCoords -> " << particlePosLoc << std::endl;*/
+	std::cout << "UNIFORM LOCATION::ParticleCoords -> " << particlePosLoc << std::endl;
 
-	/*int particleColorsLoc = glGetUniformLocation(shaderProgram.shaderProgramID, "ParticleColors");
+	int particleColorsLoc = glGetUniformLocation(shaderProgram.shaderProgramID, "ParticleColors");
 	glUniform3fv(particleColorsLoc, NUM_PARTICLES, particleSystem.getParticleColor());
-	std::cout << "UNIFORM LOCATION::ParticleColors -> " << particleColorsLoc << std::endl;*/
+	std::cout << "UNIFORM LOCATION::ParticleColors -> " << particleColorsLoc << std::endl;
 
 	// SSBO for particles
-	unsigned int SSBO_ParticlePos;
+	GLuint SSBO_ParticlePos;
 	glGenBuffers(1, &SSBO_ParticlePos);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_ParticlePos);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, NUM_PARTICLES * 2 * sizeof(float), particleSystem.getParticlePos(), GL_DYNAMIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, SSBO_ParticlePos);
 
 	// SSBO for particle colors
-	unsigned int SSBO_ParticleColor;
+	GLuint SSBO_ParticleColor;
 	glGenBuffers(1, &SSBO_ParticleColor);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_ParticleColor);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, NUM_PARTICLES * 3 * sizeof(float), particleSystem.getParticleColor(), GL_DYNAMIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, NUM_PARTICLES * 4 * sizeof(float), particleSystem.getParticleColor(), GL_DYNAMIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, SSBO_ParticleColor);
-
-	float* particleColors = particleSystem.getParticleColor();
-	for (int i = 0; i < NUM_PARTICLES; ++i) {
-		std::cout << particleColors[i] << " " << particleColors[i + 1] << " " << particleColors[i + 2] << std::endl;
-	}
-		
 
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
@@ -165,7 +159,6 @@ int main() {
 			float deltaTime = (currTime - prevTime) / 1000.0f;
 			if (deltaTime) {
 				particleSystem.simulate(deltaTime);
-				//glUniform2fv(particlePosLoc, NUM_PARTICLES, particleSystem.getParticlePos());
 				
 				// SSBO buffer binding
 				glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_ParticlePos);
