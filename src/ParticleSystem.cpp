@@ -48,7 +48,7 @@ void ParticleSystem::simulate(float deltaTime){
 	float subDeltaTime = deltaTime / SUBSTEPS;
 	for (unsigned i = 0; i < SUBSTEPS; ++i) {
 		if (m_CUDA_ENABLED) {
-			launchBothKernelEigen(cudaHelper, subDeltaTime);
+			launchParticleKernelEigen(cudaHelper, subDeltaTime);
 			for (unsigned j = 0; j < m_numParticles; ++j) {
 				m_particlePos[j * 2] = m_particles[j].m_position[0];
 				m_particlePos[j * 2 + 1] = m_particles[j].m_position[1];
@@ -201,8 +201,8 @@ void ParticleSystem::toggleGravity() {
 	if (m_GRAVITY) {
 		std::cout << "ON" << std::endl;
 		for (unsigned i = 0; i < m_numParticles; ++i) {
-			m_particles[i].m_velocity[0] = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
-			m_particles[i].m_velocity[1] = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+			m_particles[i].m_velocity[0] = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 10.0f;
+			m_particles[i].m_velocity[1] = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 10.0f;
 			m_particleVel[i * 2] = m_particles[i].m_velocity[0];
 			m_particleVel[i * 2 + 1] = m_particles[i].m_velocity[1];
 		}
