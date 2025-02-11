@@ -8,8 +8,8 @@
 #include "../include/Shader.h"
 
 const unsigned int WINDOW_SIZE = 800;
-const unsigned int NUM_PARTICLES = 500;
-const float RADIUS = 0.01f;
+const unsigned int NUM_PARTICLES = 100;
+const float RADIUS = 0.005f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window, ParticleSystem& particleSystem);
@@ -111,14 +111,6 @@ int main() {
 	int numParticlesLoc = glGetUniformLocation(shaderProgram.shaderProgramID, "NumParticles");
 	glUniform1i(numParticlesLoc, NUM_PARTICLES);
 	std::cout << "UNIFORM LOCATION::NumParticles -> " << numParticlesLoc << std::endl;
-
-	int particlePosLoc = glGetUniformLocation(shaderProgram.shaderProgramID, "ParticleCoords");
-	glUniform2fv(particlePosLoc, NUM_PARTICLES, particleSystem.getParticlePos());
-	std::cout << "UNIFORM LOCATION::ParticleCoords -> " << particlePosLoc << std::endl;
-
-	int particleColorsLoc = glGetUniformLocation(shaderProgram.shaderProgramID, "ParticleColors");
-	glUniform3fv(particleColorsLoc, NUM_PARTICLES, particleSystem.getParticleColor());
-	std::cout << "UNIFORM LOCATION::ParticleColors -> " << particleColorsLoc << std::endl;
 
 	// SSBO for particles
 	GLuint SSBO_ParticlePos;

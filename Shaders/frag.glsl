@@ -20,6 +20,7 @@ void main() {
 		
 		if (dist <= Radius) {
 			FragColor = ParticleColors[i];
+			break;
 		}
 	}
 }
