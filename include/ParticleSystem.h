@@ -22,6 +22,7 @@ private:
 	bool m_VERLET  = true;
 	bool m_CUDA_ENABLED = false;
 	bool m_EIGEN_ENABLED = true;
+	bool m_OPTIMIZED = true;
 
 	// MISC particle information
 	unsigned int m_numParticles;

@@ -8,6 +8,11 @@
 
 const unsigned blockSize = 32; // Threads per block
 
-__global__ void handleParticleKernelEigen(unsigned numParticles, float radius, float deltaTime, Particle* particles, bool GRAVITY, float gravity);
+__global__ void handleParticleKernel(unsigned numParticles, float radius, float deltaTime, Particle* particles, bool GRAVITY, float gravity);
 
-void launchParticleKernelEigen(CudaHelper& cudaHelper, float deltaTime);
+__global__ void handleParticleKernelOpt(unsigned numParticles, float radius, float deltaTime, Particle* particles, bool GRAVITY, float gravity);
+
+
+void launchParticleKernel(CudaHelper& cudaHelper, float deltaTime);
+
+void launchParticleKernelOpt(CudaHelper& cudaHelper, float deltaTime);
