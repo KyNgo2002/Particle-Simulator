@@ -89,62 +89,65 @@ __global__ void handleParticleKernel(unsigned numParticles, float radius, float 
 
 __global__ void handleParticleKernelOpt(unsigned numParticles, float radius, float deltaTime, Particle* particles, bool GRAVITY, float gravity) {
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
-    if (GRAVITY) {
-        particles[tid].m_velocity[1] -= gravity * deltaTime;
-    }
-    particles[tid].m_position += particles[tid].m_velocity * deltaTime;
+    if (tid < numParticles) {
 
-    // Collisions
-    for (unsigned i = tid + 1; i < numParticles; ++i) {
-        Eigen::Vector2f normal = particles[tid].m_position - particles[i].m_position;
-        // Optimization
-        if (abs(normal[0]) > 2.1f * radius) continue;
-        if (abs(normal[1]) > 2.1f * radius) continue;
+        if (GRAVITY) {
+            particles[tid].m_velocity[1] -= gravity * deltaTime;
+        }
+        particles[tid].m_position += particles[tid].m_velocity * deltaTime;
 
-        float dist = normal.norm();
+        // Collisions
+        for (unsigned i = tid + 1; i < numParticles; ++i) {
+            Eigen::Vector2f normal = particles[tid].m_position - particles[i].m_position;
+            // Optimization
+            if (abs(normal[0]) > 2.1f * radius) continue;
+            if (abs(normal[1]) > 2.1f * radius) continue;
 
-        // Collision occured
-        if (dist < 2.0f * radius) {
-            Eigen::Vector2f unitNormal = normal.normalized();
+            float dist = normal.norm();
 
-            // Position update
-            float delta = 0.5f * (2.0f * radius - dist);
-            particles[tid].m_position += delta * unitNormal;
-            particles[i].m_position -= delta * unitNormal;
+            // Collision occured
+            if (dist < 2.0f * radius) {
+                Eigen::Vector2f unitNormal = normal.normalized();
 
-            // Velocity Update
-            Eigen::Vector2f v1n = (particles[tid].m_velocity.dot(normal)) / (dist * dist) * normal;
-            Eigen::Vector2f v1t = (particles[tid].m_velocity - v1n);
-            Eigen::Vector2f v2n = (particles[i].m_velocity.dot(normal)) / (dist * dist) * normal;
-            Eigen::Vector2f v2t = (particles[i].m_velocity - v2n);
+                // Position update
+                float delta = 0.5f * (2.0f * radius - dist);
+                particles[tid].m_position += delta * unitNormal;
+                particles[i].m_position -= delta * unitNormal;
 
-            particles[tid].m_velocity = (v2n + v1t);
-            particles[i].m_velocity = (v1n + v2t);
+                // Velocity Update
+                Eigen::Vector2f v1n = (particles[tid].m_velocity.dot(normal)) / (dist * dist) * normal;
+                Eigen::Vector2f v1t = (particles[tid].m_velocity - v1n);
+                Eigen::Vector2f v2n = (particles[i].m_velocity.dot(normal)) / (dist * dist) * normal;
+                Eigen::Vector2f v2t = (particles[i].m_velocity - v2n);
 
-            if (GRAVITY) {
-                particles[tid].m_velocity *= 0.7;
-                particles[i].m_velocity *= 0.7;
+                particles[tid].m_velocity = (v2n + v1t);
+                particles[i].m_velocity = (v1n + v2t);
+
+                if (GRAVITY) {
+                    particles[tid].m_velocity *= 0.7;
+                    particles[i].m_velocity *= 0.7;
+                }
             }
         }
-    }
 
-    bool top = (particles[tid].m_position[1] > (1.0f - radius));
-    bool bottom = (particles[tid].m_position[1] < (-1.0f + radius));
+        bool top = (particles[tid].m_position[1] > (1.0f - radius));
+        bool bottom = (particles[tid].m_position[1] < (-1.0f + radius));
 
-    if (top || bottom) {
-        particles[tid].m_position[1] = top ? (1.0f - radius) : (-1.0f + radius);
-        particles[tid].m_velocity[1] *= -1.0f;
-        if (GRAVITY)
-            particles[tid].m_velocity[1] *= 0.7;
-    }
+        if (top || bottom) {
+            particles[tid].m_position[1] = top ? (1.0f - radius) : (-1.0f + radius);
+            particles[tid].m_velocity[1] *= -1.0f;
+            if (GRAVITY)
+                particles[tid].m_velocity[1] *= 0.7;
+        }
 
-    bool left = (particles[tid].m_position[0] < (-1.0f + radius));
-    bool right = (particles[tid].m_position[0] > (1.0f - radius));
-    if (left || right) {
-        particles[tid].m_position[0] = left ? (-1.0f + radius) : (1.0f - radius);
-        particles[tid].m_velocity[0] *= -1.0f;
-        if (GRAVITY)
-            particles[tid].m_velocity[0] *= 0.7;
+        bool left = (particles[tid].m_position[0] < (-1.0f + radius));
+        bool right = (particles[tid].m_position[0] > (1.0f - radius));
+        if (left || right) {
+            particles[tid].m_position[0] = left ? (-1.0f + radius) : (1.0f - radius);
+            particles[tid].m_velocity[0] *= -1.0f;
+            if (GRAVITY)
+                particles[tid].m_velocity[0] *= 0.7;
+        }
     }
 }
 
@@ -169,7 +172,7 @@ void launchParticleKernelOpt(CudaHelper& cudaHelper, float deltaTime) {
     float gravity = 10.0f;
 
     // Kernel Launch
-    handleParticleKernelOpt << < numBlocks, blockSize >> > (numParticles, cudaHelper.m_radius, deltaTime, cudaHelper.d_particles, cudaHelper.m_GRAVITY, gravity);
+    handleParticleKernelOpt <<< numBlocks, blockSize >>> (numParticles, cudaHelper.m_radius, deltaTime, cudaHelper.d_particles, cudaHelper.m_GRAVITY, gravity);
     cudaDeviceSynchronize();
     cudaCheckErrors("Kernel Launch -> Handle Particle collisions");
 

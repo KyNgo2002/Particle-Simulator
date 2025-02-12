@@ -14,7 +14,6 @@ public:
 	Particle* h_particles;
 	Particle* d_particles;
 
-	
 	CudaHelper();
 	CudaHelper(unsigned numParticles, float radius, bool gravity, Particle* h_particles);
 
