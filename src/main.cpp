@@ -1,14 +1,15 @@
 #include <iostream>
 #include <glad/glad.h> 
-#include <vector>
 #include <iomanip>
 #include "windows.h"
 #include <GLFW/glfw3.h>
 #include "../include/ParticleSystem.h"
 #include "../include/Shader.h"
+#include <cuda_runtime.h>
+#include <cuda_gl_interop.h>
 
 const unsigned int WINDOW_SIZE = 800;
-const unsigned int NUM_PARTICLES = 1000;
+const unsigned int NUM_PARTICLES = 5000;
 const float RADIUS = 0.005f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -125,6 +126,20 @@ int main() {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBO_ParticleColor);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, NUM_PARTICLES * 4 * sizeof(float), particleSystem.getParticleColor(), GL_DYNAMIC_DRAW);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, SSBO_ParticleColor);
+
+	//cudaGraphicsResource* cudaSSBO;
+	//// Cuda write flag COME BACK
+	//cudaGraphicsGLRegisterBuffer(&cudaSSBO, SSBO_ParticlePos, cudaGraphicsMapFlagsWriteDiscard);
+
+	//cudaGraphicsMapResources(1, &cudaSSBO);
+	//float* dptr;
+	//size_t num_bytes;
+	//cudaGraphicsResourceGetMappedPointer((void**)&dptr, &num_bytes, cudaSSBO);
+
+	//// Kernel Call
+
+	//// Unmap SSBO so OpenGL can use it
+	//cudaGraphicsUnmapResources(1, &cudaSSBO);
 
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
