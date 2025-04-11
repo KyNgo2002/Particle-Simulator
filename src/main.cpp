@@ -9,7 +9,7 @@
 #include <cuda_gl_interop.h>
 
 const unsigned int WINDOW_SIZE = 800;
-const unsigned int NUM_PARTICLES = 5000;
+const unsigned int NUM_PARTICLES = 1000;
 const float RADIUS = 0.005f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
